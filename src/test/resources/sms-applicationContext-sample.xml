@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans  
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd  
+           http://www.springframework.org/schema/context  
+          http://www.springframework.org/schema/context/spring-context-3.0.xsd  
+           http://www.springframework.org/schema/aop  
+          http://www.springframework.org/schema/aop/spring-aop-3.0.xsd  
+           http://www.springframework.org/schema/mvc
+          http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd  
+           http://www.springframework.org/schema/tx   
+           http://www.springframework.org/schema/tx/spring-tx-3.0.xsd" >
+
+	<!-- 云片网的配置 -->
+	<bean id="yunpianProvider"
+		class="cn.sgtcloud.common.smsnotifymodule.service.impl.YUNPIANSMSProvider">
+		<constructor-arg index="0" value="990fee5e6dd371109645889412144f21" />
+	</bean>
+	<!-- 随机验证码生成配置 -->
+	<bean id="captchaProducer" class="com.google.code.kaptcha.impl.DefaultKaptcha">
+		<property name="config">
+			<bean class="com.google.code.kaptcha.util.Config">
+				<constructor-arg>
+					<props>
+						<prop key="kaptcha.image.width">250</prop>
+						<prop key="kaptcha.image.height">100</prop>
+						<prop key="kaptcha.border">no</prop>
+						<prop key="kaptcha.border.color">105,179,90</prop>
+						<prop key="kaptcha.textproducer.font.color">red</prop>
+						<prop key="kaptcha.textproducer.font.size">90</prop>
+						<prop key="kaptcha.session.key">code</prop>
+						<prop key="kaptcha.textproducer.char.string">0123456789</prop>
+						<prop key="kaptcha.textproducer.char.length">6</prop>
+						<prop key="kaptcha.textproducer.font.names">宋体,楷体,微软雅黑</prop>
+					</props>
+				</constructor-arg>
+			</bean>
+		</property>
+	</bean>
+	<!-- 验证码短信管理配置 -->
+	<bean id="smsNotifyManager" class="cn.sgtcloud.common.smsnotifymodule.service.manager.SmsNotifyManager">
+		<constructor-arg index="0" ref="yunpianProvider"/>
+		<constructor-arg index="1" ref="captchaProducer"/>
+		<!-- 配置guava cache 有效期  短信验证码有效期单位秒（SECONDS） -->
+		<constructor-arg index="2" value="5"/>
+		<!-- 配置guava cache 最大size 可以不设置该参数（默认值-1，不进行限制最大值）-->
+		<constructor-arg index="3" value="1000"/>
+	</bean>
+
+</beans>  
