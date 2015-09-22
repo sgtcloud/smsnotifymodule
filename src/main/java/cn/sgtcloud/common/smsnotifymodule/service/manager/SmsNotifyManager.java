@@ -1,7 +1,5 @@
 package cn.sgtcloud.common.smsnotifymodule.service.manager;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -28,9 +26,6 @@ public class SmsNotifyManager {
 	//随机验证码生成对象
 	private static Producer captchaProducer;
 	
-	//保存验证码信息
-	private static Map<String, Object> map = null;
-	
 	//默认包含占位符的短信模板
 	private final static String DEFAULT_SMS_TEMPLATE = "【{0}】您的验证码是{1}"; 
 	
@@ -56,7 +51,6 @@ public class SmsNotifyManager {
 	private void init(SMSProvider smsProvider,Producer captchaProducer,int time,int maximumSize){
 		SmsNotifyManager.smsProvider=smsProvider;
 		SmsNotifyManager.captchaProducer=captchaProducer;
-		SmsNotifyManager.map=new HashMap<String, Object>();
 		SmsNotifyManager.cache= CacheBuilder
 		          .newBuilder()
 		          .maximumSize(maximumSize)
@@ -83,6 +77,8 @@ public class SmsNotifyManager {
 			String result=smsProvider.sendMessage(mobile, content);
 			if(result.equals("ok")){
 				cache.put(mobile, captcha);
+				return result;
+			}else{
 				return result;
 			}
 		} catch (Exception e) {
@@ -143,9 +139,6 @@ public class SmsNotifyManager {
 				}
 				return result;
 			}
-			
-			
-			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

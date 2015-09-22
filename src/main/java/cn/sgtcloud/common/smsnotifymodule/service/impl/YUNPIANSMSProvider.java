@@ -81,12 +81,11 @@ public class YUNPIANSMSProvider implements SMSProvider{
         params.put("apikey", apiKey);
         params.put("text", text);
         params.put("mobile", mobile);
-//        String result = post(URI_SEND_SMS, params);
-//        if(StringUtils.isNotEmpty(result)){
-//        	JSONObject jsonObject = JSONObject.fromObject(result);
-//        	return jsonObject.optString("msg").toLowerCase();
-//        }
-//        return "发送失败";
+        String result = post(URI_SEND_SMS, params);
+        if(StringUtils.isNotEmpty(result)){
+        	JSONObject jsonObject = JSONObject.fromObject(result);
+        	return jsonObject.optString("msg").toLowerCase();
+        }
         return "ok";
     }
     /**
