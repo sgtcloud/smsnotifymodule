@@ -95,7 +95,7 @@
 <pre>
     smsNotifyManager.fillStringByArgs("包含占位符字符串内容","占位符正则表达式","要替换占位符的字符串");
 </pre>
-**<a href="" target="_blank">更多请查看javadoc</a><br/>**
+
 **代码方式声明<br/>**
 1.创建实例<br>
   <pre>
