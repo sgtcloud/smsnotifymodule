@@ -1,11 +1,17 @@
 package cn.sgtcloud.common.smsnotifymodule.test;
 
 
+import java.util.Properties;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.google.code.kaptcha.impl.DefaultKaptcha;
+import com.google.code.kaptcha.util.Config;
+
+import cn.sgtcloud.common.smsnotifymodule.service.impl.YUNPIANSMSProvider;
 import cn.sgtcloud.common.smsnotifymodule.service.manager.SmsNotifyManager;
 
 public class YUNPIANSMSProviderSpringTest {
@@ -42,6 +48,18 @@ public class YUNPIANSMSProviderSpringTest {
 	
 	@Test
 	public void getUserInfo() {
-		System.out.println(smsNotifyManager.getUserInfo().toString());
+//		System.out.println(smsNotifyManager.getUserInfo().toString());
+		
+	}
+	@Test
+	public void test(){
+		DefaultKaptcha kaptcha = new DefaultKaptcha();
+		Properties properties = new Properties();
+		properties.setProperty("kaptcha.textproducer.char.string", "0123456789");
+		properties.setProperty("kaptcha.textproducer.char.length", "6");
+		Config config = new Config(properties);
+		kaptcha.setConfig(config);
+		smsNotifyManager = new SmsNotifyManager(new YUNPIANSMSProvider(""), kaptcha, 10);
+		System.out.println(kaptcha.createText());
 	}
 }

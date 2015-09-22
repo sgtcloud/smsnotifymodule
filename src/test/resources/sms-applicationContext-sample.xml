@@ -25,16 +25,16 @@
 			<bean class="com.google.code.kaptcha.util.Config">
 				<constructor-arg>
 					<props>
-						<prop key="kaptcha.image.width">250</prop>
+						<!-- <prop key="kaptcha.image.width">250</prop>
 						<prop key="kaptcha.image.height">100</prop>
 						<prop key="kaptcha.border">no</prop>
 						<prop key="kaptcha.border.color">105,179,90</prop>
 						<prop key="kaptcha.textproducer.font.color">red</prop>
 						<prop key="kaptcha.textproducer.font.size">90</prop>
-						<prop key="kaptcha.session.key">code</prop>
+						<prop key="kaptcha.session.key">code</prop> -->
 						<prop key="kaptcha.textproducer.char.string">0123456789</prop>
 						<prop key="kaptcha.textproducer.char.length">6</prop>
-						<prop key="kaptcha.textproducer.font.names">宋体,楷体,微软雅黑</prop>
+						<!-- <prop key="kaptcha.textproducer.font.names">宋体,楷体,微软雅黑</prop> -->
 					</props>
 				</constructor-arg>
 			</bean>
