@@ -24,8 +24,11 @@
   &lt;artifactId>smsnotifymodule&lt;/artifactId>
   &lt;version>0.0.1-SNAPSHOT&lt;/version>
   &lt;classifier>javadoc&lt;/classifier>
-&lt;/dependency><br/></pre>
-**spring方式注入2**<br/>
+&lt;/dependency>
+</pre>
+
+**spring方式注入**<br/>
+
 这里以云片网为例的配置<br/>
 1.创建bean声明，可从相关人员获得生产环境的参数<br/>
 <pre>
@@ -95,6 +98,7 @@
 <pre>
     smsNotifyManager.fillStringByArgs("包含占位符字符串内容","占位符正则表达式","要替换占位符的字符串");
 </pre>
+
 **代码方式声明<br/>**
 1.创建实例<br>
   <pre>
