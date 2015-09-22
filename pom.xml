@@ -4,7 +4,7 @@
   <artifactId>smsnotifymodule</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>smsnotifymodule</name>
-  <description>smsnotifymodule api2 for short message service</description>
+  <description>smsnotifymodule api for short message service</description>
   
   <properties>
 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

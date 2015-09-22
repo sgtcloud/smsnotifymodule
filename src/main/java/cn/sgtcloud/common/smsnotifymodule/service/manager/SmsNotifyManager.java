@@ -295,29 +295,34 @@ public class SmsNotifyManager {
 	 * 验证验证码是否正确
 	 * @param smobile  接受短信用户的手机号
 	 * @param captcha  用户输入的验证码
-	 * @return
+	 * @return 1.验证成功 2.验证码输入错误 3.验证码已失效 4.异常操作
 	 */
-	public static boolean isMatcher(String smobile,String captcha){
-		
+	public static String isMatcher(String smobile,String captcha){
 		
 		try {
 			String result=cache.get(smobile, new Callable<String>() {
-
 				@Override
 				public String call() throws Exception {
 					// TODO Auto-generated method stub
-					return "";
+					return "验证码已失效！";
 				}
-				
 			});
+			if(StringUtils.isNotEmpty(result) && result.equals("验证码已失效！")){
+				return "3";
+			}
+			if(captcha.equals(result)){
+				return "1";
+			}else{
+				return "2";
+			}
 //			System.out.println("size:"+cache.size());
 //			System.out.println("=====>result:"+Arrays.toString(cache.asMap().keySet().toArray()));
-			return captcha.equals(result);
+			
 		} catch (ExecutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return false;
+		return "4";
 	}
 	
 }

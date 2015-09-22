@@ -7,23 +7,23 @@
 # 快速开始 #
 **通过maven安装**<br/>
 <pre>
-&lt;dependency><br/>
-  &lt;groupId>cn.sgtcloud.common&lt;/groupId><br/>
-  &lt;artifactId>smsnotifymodule&lt;/artifactId><br/>
-  &lt;version>0.0.1-SNAPSHOT&lt;/version><br/>
-&lt;/dependency><br/>
+&lt;dependency>
+  &lt;groupId>cn.sgtcloud.common&lt;/groupId>
+  &lt;artifactId>smsnotifymodule&lt;/artifactId>
+  &lt;version>0.0.1-SNAPSHOT&lt;/version>
+&lt;/dependency>
 &lt;!-- 下面是源码和javadoc，非必须添加 -->
-&lt;dependency><br/>
-  &lt;groupId>cn.sgtcloud.common&lt;/groupId><br/>
-  &lt;artifactId>smsnotifymodule&lt;/artifactId><br/>
-  &lt;version>0.0.1-SNAPSHOT&lt;/version><br/>
-  &lt;classifier>sources&lt;/classifier><br/>
-&lt;/dependency><br/>
-&lt;dependency><br/>
-  &lt;groupId>cn.sgtcloud.common&lt;/groupId><br/>
-  &lt;artifactId>smsnotifymodule&lt;/artifactId><br/>
-  &lt;version>0.0.1-SNAPSHOT&lt;/version><br/>
-  &lt;classifier>javadoc&lt;/classifier><br/>
+&lt;dependency>
+  &lt;groupId>cn.sgtcloud.common&lt;/groupId>
+  &lt;artifactId>smsnotifymodule&lt;/artifactId>
+  &lt;version>0.0.1-SNAPSHOT&lt;/version>
+  &lt;classifier>sources&lt;/classifier>
+&lt;/dependency>
+&lt;dependency>
+  &lt;groupId>cn.sgtcloud.common&lt;/groupId>
+  &lt;artifactId>smsnotifymodule&lt;/artifactId>
+  &lt;version>0.0.1-SNAPSHOT&lt;/version>
+  &lt;classifier>javadoc&lt;/classifier>
 &lt;/dependency><br/></pre>
 **spring方式注入<br/>**
 这里以云片网为例的配置<br/>
@@ -95,7 +95,6 @@
 <pre>
     smsNotifyManager.fillStringByArgs("包含占位符字符串内容","占位符正则表达式","要替换占位符的字符串");
 </pre>
-
 **代码方式声明<br/>**
 1.创建实例<br>
   <pre>
