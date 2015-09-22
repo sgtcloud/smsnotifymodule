@@ -25,7 +25,7 @@
   &lt;version>0.0.1-SNAPSHOT&lt;/version><br/>
   &lt;classifier>javadoc&lt;/classifier><br/>
 &lt;/dependency><br/></pre>
-**spring方式注入<br/>**
+**spring方式注入**
 这里以云片网为例的配置<br/>
 1.创建bean声明，可从相关人员获得生产环境的参数<br/>
 <pre>
