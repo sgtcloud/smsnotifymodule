@@ -51,11 +51,18 @@ public class SmsNotifyManager {
 	private void init(SMSProvider smsProvider,Producer captchaProducer,int time,int maximumSize){
 		SmsNotifyManager.smsProvider=smsProvider;
 		SmsNotifyManager.captchaProducer=captchaProducer;
-		SmsNotifyManager.cache= CacheBuilder
-		          .newBuilder()
-		          .maximumSize(maximumSize)
-		          .expireAfterWrite(time, DEFAULT_SMS_TIMEUNIT).softValues()
-		          .build();
+		if(maximumSize < 0){
+			SmsNotifyManager.cache= CacheBuilder
+			          .newBuilder()
+			          .expireAfterWrite(time, DEFAULT_SMS_TIMEUNIT).softValues()
+			          .build();
+		}else{
+			SmsNotifyManager.cache= CacheBuilder
+			          .newBuilder()
+			          .maximumSize(maximumSize)
+			          .expireAfterWrite(time, DEFAULT_SMS_TIMEUNIT).softValues()
+			          .build();
+		}
 	}
 	/**
 	 * 获取用户信息

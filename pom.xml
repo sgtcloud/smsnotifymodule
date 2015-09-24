@@ -13,6 +13,19 @@
 	<httpclient.version>4.3.5</httpclient.version>
   </properties>
   
+  <distributionManagement>
+		<snapshotRepository>
+			<id> Internal-Snapshot </id>
+			<name>  Internal-Snapshot</name>
+			<url> http://portal.gall.me/nexus/content/repositories/snapshots/</url>
+		</snapshotRepository>
+		<repository>
+			<id> Internal-Release </id>
+			<name>  Internal-Release</name>
+			<url> http://portal.gall.me/nexus/content/repositories/releases/</url>
+		</repository>
+</distributionManagement>
+	
   <dependencies>
   		<dependency>
             <groupId>org.apache.httpcomponents</groupId>
