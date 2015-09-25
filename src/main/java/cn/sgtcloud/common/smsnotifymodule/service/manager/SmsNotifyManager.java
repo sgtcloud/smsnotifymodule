@@ -311,6 +311,7 @@ public class SmsNotifyManager {
 				return "3";
 			}
 			if(captcha.equals(result)){
+				cache.invalidate(smobile);
 				return "1";
 			}else{
 				return "2";
