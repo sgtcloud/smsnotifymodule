@@ -25,9 +25,10 @@ public class YUNPIANSMSProviderSpringTest {
 	}
 	@Test
 	public void sendMessage() {
-//		String captcha = smsNotifyManager.getCaptcha();
+		String captcha = smsNotifyManager.getCaptcha();
 //		System.out.println(smsNotifyManager.SendMessage("15538856646", "上海游际",captcha,10));
-		System.out.println(smsNotifyManager.SendTemplateMessage("15538856646","【上海游际】{0}({1}手机动态码，请完成验证)，如非本人操作，请忽略本短信","123456","\\{(\\d)\\}","123456","神仙消消乐"));
+		System.out.println(smsNotifyManager.SendTemplateMessage("15538856646", "【上海游际】{0}({1}手机动态码，请完成验证)，如非本人操作，请忽略本短信", captcha, "\\{(\\d)\\}", captcha,"test"));
+//		System.out.println(smsNotifyManager.SendTemplateMessage("15538856646","【上海游际】{0}({1}手机动态码，请完成验证)，如非本人操作，请忽略本短信","123456","\\{(\\d)\\}","123456","神仙消消乐"));
 		System.out.println(smsNotifyManager.isMatcher("15538856646", "123456"));
 		System.out.println(smsNotifyManager.isMatcher("15538856646", "123456"));
 		try {

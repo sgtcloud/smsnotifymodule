@@ -21,10 +21,10 @@ public class SmsNotifyManager {
 	private static final Logger log = LoggerFactory.getLogger(SmsNotifyManager.class);
 	
 	//短信服务提供商
-	private static SMSProvider smsProvider;
+	private SMSProvider smsProvider;
 
 	//随机验证码生成对象
-	private static Producer captchaProducer;
+	private Producer captchaProducer;
 	
 	//默认包含占位符的短信模板
 	private final static String DEFAULT_SMS_TEMPLATE = "【{0}】您的验证码是{1}"; 
@@ -49,12 +49,12 @@ public class SmsNotifyManager {
 	}
 	
 	private void init(SMSProvider smsProvider,Producer captchaProducer,int time,int maximumSize){
-		SmsNotifyManager.smsProvider=smsProvider;
-		SmsNotifyManager.captchaProducer=captchaProducer;
+		this.smsProvider=smsProvider;
+		this.captchaProducer=captchaProducer;
 		if(maximumSize < 0){
 			SmsNotifyManager.cache= CacheBuilder
 			          .newBuilder()
-			          .expireAfterWrite(time, DEFAULT_SMS_TIMEUNIT).softValues()
+			          .expireAfterWrite(time, DEFAULT_SMS_TIMEUNIT)
 			          .build();
 		}else{
 			SmsNotifyManager.cache= CacheBuilder
@@ -78,19 +78,16 @@ public class SmsNotifyManager {
 	 * @param captcha  随机生成的短信验证码
 	 * @return String  执行结果   ok：发送成功 ；其他：发送失败原因
 	 */
-	public static String SendMessage(String mobile,String content,String captcha) {
+	public String SendMessage(String mobile,String content,String captcha) {
 		
 		try {
 			String result=smsProvider.sendMessage(mobile, content);
 			if(result.equals("ok")){
 				cache.put(mobile, captcha);
-				return result;
-			}else{
-				return result;
 			}
+			return result;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		return "异常错误！";
 	}
@@ -103,7 +100,7 @@ public class SmsNotifyManager {
 	 * @param captcha 随机生成的验证码
 	 * @return String 执行结果   ok：发送成功 ；其他：发送失败原因
 	 */
-	public static String SendTemplateMessage(String mobile, String company,String captcha) {
+	public String SendTemplateMessage(String mobile, String company,String captcha) {
 //		String captcha=getCaptcha();
 		try {
 			String content=fillStringByArgs(DEFAULT_SMS_TEMPLATE,DEFAULT_SMS_REGEX,company,captcha);
@@ -116,12 +113,10 @@ public class SmsNotifyManager {
 				}
 				return result;
 			}
-			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return "异常错误！";
+			log.error(e.getMessage(), e);
 		}
+		return "异常错误！";
 	}
 	
 	/**
@@ -133,7 +128,7 @@ public class SmsNotifyManager {
 	 * @param args    短信模板中替换占位符的内容 （占位符和内容的顺序要保持一致）
 	 * @return  String  执行结果   ok：发送成功 ；其他：发送失败原因
 	 */
-	public static String SendTemplateMessage(String mobile,String template,String captcha,String regex,String... args) {
+	public String SendTemplateMessage(String mobile,String template,String captcha,String regex,String... args) {
 		
 		try {
 			String content=fillStringByArgs(template,regex,args);
@@ -141,14 +136,14 @@ public class SmsNotifyManager {
 				return "非法的短信模板和替换内容";
 			}else{
 				String result=smsProvider.sendMessage(mobile, content);
+				System.out.println("===result===>"+result);
 				if(result.equals("ok")){
 					cache.put(mobile, captcha);
 				}
 				return result;
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		return "异常错误！";
 	}
@@ -162,27 +157,21 @@ public class SmsNotifyManager {
 	 * @param args    短信模板中替换占位符的内容 （占位符和内容的顺序要保持一致）
 	 * @return   String 执行结果   ok：发送成功 ；其他：发送失败的原因   
 	 */
-	public static String SendTemplateMessage(String mobile, String template,String captcha,Pattern pattern,String... args) {
+	public String SendTemplateMessage(String mobile, String template,String captcha,Pattern pattern,String... args) {
 		
 		try {
 			String content=fillStringByArgs(template,pattern,args);
-			
 			if(StringUtils.isNotBlank(content) && content.equals("error")){
-				
 				return "非法的短信模板和替换内容";
-				
 			}else{
 				String result=smsProvider.sendMessage(mobile, content);
 				if(result.equals("ok")){
-					
 					cache.put(mobile, captcha);
-					
 				}
+				return result;
 			}
-			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		return "异常错误！";
 	}
@@ -195,28 +184,21 @@ public class SmsNotifyManager {
 	 * @param args    短信模板中替换占位符的内容 （占位符和内容的顺序要保持一致）
 	 * @return  String 执行结果   ok：发送成功 ；其他：发送失败原因  
 	 */
-	public static String SendTemplateMessage(String mobile, String template,String captcha,Matcher m,String... args) {
+	public String SendTemplateMessage(String mobile, String template,String captcha,Matcher m,String... args) {
 		
 		try {
 			String content=fillStringByArgs(template,m,args);
-			
 			if(StringUtils.isNotBlank(content) && content.equals("error")){
-				
 				return "非法的短信模板和替换内容";
-				
 			}else{
 				String result=smsProvider.sendMessage(mobile, content);
 				if(result.equals("ok")){
-					
 					cache.put(mobile, captcha);
-					
 				}
 				return result;
 			}
-			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		return "异常错误！";
 	}
@@ -228,7 +210,7 @@ public class SmsNotifyManager {
 	 * @param arr 要替换占位符的字符串（顺序和占位符一定要一致）
 	 * @return
 	 */
-	public static String fillStringByArgs(String str,String regex,String... arr){
+	public String fillStringByArgs(String str,String regex,String... arr){
 		try{
 	        Matcher m = Pattern.compile(regex).matcher(str);
 	        int count = 0;
@@ -250,7 +232,7 @@ public class SmsNotifyManager {
 	 * @param arr 要替换占位符的字符串（顺序和占位符一定要一致）
 	 * @return
 	 */
-	public static String fillStringByArgs(String str,Pattern pattern,String... arr){
+	public String fillStringByArgs(String str,Pattern pattern,String... arr){
 		try{
 	        Matcher m=pattern.matcher(str);
 	        int count = 0;
@@ -271,7 +253,7 @@ public class SmsNotifyManager {
 	 * @param arr 要替换占位符的字符串（顺序和占位符一定要一致）
 	 * @return
 	 */
-	public static String fillStringByArgs(String str,Matcher m,String... arr){
+	public String fillStringByArgs(String str,Matcher m,String... arr){
 		try{
 			int count = 0;
 	        while(m.find()){
@@ -288,7 +270,7 @@ public class SmsNotifyManager {
 	 * 生成验证码
 	 * @return
 	 */
-	public static String getCaptcha(){
+	public String getCaptcha(){
 		return captchaProducer.createText();
 	}
 	/**
@@ -297,13 +279,12 @@ public class SmsNotifyManager {
 	 * @param captcha  用户输入的验证码
 	 * @return 1.验证成功 2.验证码输入错误 3.验证码已失效 4.异常操作
 	 */
-	public static String isMatcher(String smobile,String captcha){
+	public String isMatcher(String smobile,String captcha){
 		
 		try {
 			String result=cache.get(smobile, new Callable<String>() {
 				@Override
 				public String call() throws Exception {
-					// TODO Auto-generated method stub
 					return "验证码已失效！";
 				}
 			});
@@ -316,12 +297,8 @@ public class SmsNotifyManager {
 			}else{
 				return "2";
 			}
-//			System.out.println("size:"+cache.size());
-//			System.out.println("=====>result:"+Arrays.toString(cache.asMap().keySet().toArray()));
-			
 		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		return "4";
 	}
