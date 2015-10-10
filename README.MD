@@ -66,8 +66,10 @@
 	&lt;constructor-arg index="1" ref="captchaProducer"/>
 	&lt;!-- 配置guava cache 有效期  短信验证码有效期单位秒（SECONDS） -->
 	&lt;constructor-arg index="2" value="5"/>
-	&lt;!-- 配置guava cache 最大size 可以不设置该参数（默认值-1，表示不进行限制最大值）-->
-	&lt;constructor-arg index="3" value="1000"/>
+	&lt;!-- 配置 限制同一个手机号连续发送短信的频率 秒为单位 建议设置为30 值为0时 不进行限制 -->
+	&lt;constructor-arg index="3" value="30"/>
+	&lt;!-- 配置guava cache 最大size 值为不大于0时，不进行限制最大值 -->
+	&lt;constructor-arg index="4" value="1000"/>
 &lt;/bean>
 </pre>
 2.代码中引用
@@ -86,9 +88,9 @@
 5.发送验证码短信
 <pre>
     &lt;!--发送通用类验证码短信 eg：【{0}】您的验证码是{1}-->
-    smsNotifyManager.SendMessage("手机号","公司名称","验证码");
+    smsNotifyManager.sendMessage("手机号","公司名称","验证码");
     &lt;!--发送模板类验证码短信 -->
-    smsNotifyManager.SendMessage("手机号","短信模板","验证码","短信模板中占位符正则表达式",<br>    "短信模板中替换占位符的内容");
+    smsNotifyManager.sendMessage("手机号","短信模板","验证码","短信模板中占位符正则表达式",<br>    "短信模板中替换占位符的内容");
 </pre>
 6.验证验证码是否正确
 <pre>
@@ -111,6 +113,6 @@
     properties.setProperty("kaptcha.textproducer.char.length", "6");
     Config config = new Config(properties);
     kaptcha.setConfig(config);
-    SmsNotifyManager smsNotifyManager = new SmsNotifyManager(yunpianProvider,kaptcha,"短信有效期时间");
+    SmsNotifyManager smsNotifyManager = new SmsNotifyManager(yunpianProvider,kaptcha,"短信有效期时间","冷却时间","最大size设置");
   </pre> 
 2.其他操作同spring方式。
