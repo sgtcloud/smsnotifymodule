@@ -11,6 +11,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.google.code.kaptcha.util.Config;
 
+import cn.sgtcloud.common.smsnotifymodule.service.exception.IllegalTemplateContentException;
+import cn.sgtcloud.common.smsnotifymodule.service.exception.LimitSendCaptchaException;
+import cn.sgtcloud.common.smsnotifymodule.service.exception.SmsNotifyException;
 import cn.sgtcloud.common.smsnotifymodule.service.impl.YUNPIANSMSProvider;
 import cn.sgtcloud.common.smsnotifymodule.service.manager.SmsNotifyManager;
 
@@ -27,22 +30,10 @@ public class YUNPIANSMSProviderSpringTest {
 	public void sendMessage() {
 		String captcha = smsNotifyManager.getCaptcha();
 //		System.out.println(smsNotifyManager.SendMessage("15538856646", "上海游际",captcha,10));
-		System.out.println(smsNotifyManager.SendTemplateMessage("15538856646", "【上海游际】{0}({1}手机动态码，请完成验证)，如非本人操作，请忽略本短信", captcha, "\\{(\\d)\\}", captcha,"test"));
+		System.out.println(smsNotifyManager.sendTemplateMessage("15538856646", "【上海游际】{0}({1}手机动态码，请完成验证)，如非本人操作，请忽略本短信", captcha, "\\{(\\d)\\}", captcha,"test"));
 //		System.out.println(smsNotifyManager.SendTemplateMessage("15538856646","【上海游际】{0}({1}手机动态码，请完成验证)，如非本人操作，请忽略本短信","123456","\\{(\\d)\\}","123456","神仙消消乐"));
 		System.out.println(smsNotifyManager.isMatcher("15538856646", "123456"));
-		System.out.println(smsNotifyManager.isMatcher("15538856646", "123456"));
-		try {
-//			System.out.println("==============分界线");
-//			System.out.println(smsNotifyManager.SendTemplateMessage("15538856647","【{0}】您的验证码是{1}。如非本人操作，请忽略本短信","654321","\\{(\\d)\\}","上海游际","654321"));
-//			System.out.println(smsNotifyManager.isMatcher("15538856647", "654321"));
-//			System.out.println("==============分界线");
-//			System.out.println(smsNotifyManager.SendTemplateMessage("15538856648","【{0}】您的验证码是{1}。如非本人操作，请忽略本短信","654321","\\{(\\d)\\}","上海游际","654321"));
-//			System.out.println(smsNotifyManager.isMatcher("15538856648", "654321"));
-//			System.out.println(smsNotifyManager.isMatcher("15538856646", "654321"));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		System.out.println(smsNotifyManager.isMatcher("15538856646", "123456"));
 	}
 	
 	@Test
@@ -58,7 +49,25 @@ public class YUNPIANSMSProviderSpringTest {
 		properties.setProperty("kaptcha.textproducer.char.length", "6");
 		Config config = new Config(properties);
 		kaptcha.setConfig(config);
-		smsNotifyManager = new SmsNotifyManager(new YUNPIANSMSProvider(""), kaptcha,10);
+		smsNotifyManager = new SmsNotifyManager(new YUNPIANSMSProvider(""), kaptcha,10,10,-1);
 		System.out.println(kaptcha.createText());
+	}
+	@Test
+	public void test2(){
+		sendMessage();
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		sendMessage();
+		try {
+			Thread.sleep(2100);
+		} catch (InterruptedException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		sendMessage();
 	}
 }

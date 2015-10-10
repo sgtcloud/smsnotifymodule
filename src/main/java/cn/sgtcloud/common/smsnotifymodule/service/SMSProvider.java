@@ -1,5 +1,7 @@
 package cn.sgtcloud.common.smsnotifymodule.service;
 
+import cn.sgtcloud.common.smsnotifymodule.service.exception.SmsNotifyException;
+
 
 /**
  * 抽象的sms供应商接口

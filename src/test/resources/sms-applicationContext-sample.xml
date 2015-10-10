@@ -45,9 +45,11 @@
 		<constructor-arg index="0" ref="yunpianProvider"/>
 		<constructor-arg index="1" ref="captchaProducer"/>
 		<!-- 配置guava cache 有效期  短信验证码有效期单位秒（SECONDS） -->
-		<constructor-arg index="2" value="5"/>
-		<!-- 配置guava cache 最大size 可以不设置该参数（默认值-1，不进行限制最大值）-->
-		<constructor-arg index="3" value="1000"/>
+		<constructor-arg index="2" value="10"/>
+		<!-- 配置 限制同一个手机号连续发送短信的频率 秒为单位 建议设置为30 值为0时 不进行限制 -->
+		<constructor-arg index="3" value="30"/>
+		<!-- 配置guava cache 最大size 值为不大于0时，不进行限制最大值）-->
+		<constructor-arg index="4" value="1000"/>
 	</bean>
 
 </beans>  

@@ -12,6 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import cn.sgtcloud.common.smsnotifymodule.service.SMSProvider;
 import cn.sgtcloud.common.smsnotifymodule.service.UserInfo;
+import cn.sgtcloud.common.smsnotifymodule.service.exception.IllegalTemplateContentException;
+import cn.sgtcloud.common.smsnotifymodule.service.exception.LimitSendCaptchaException;
+import cn.sgtcloud.common.smsnotifymodule.service.exception.SmsNotifyException;
 
 import com.google.code.kaptcha.Producer;
 import com.google.common.cache.Cache;
@@ -32,41 +35,55 @@ public class SmsNotifyManager {
 	//默认包含占位符的短信模板中占位符的正则表达式
 	private final static String DEFAULT_SMS_REGEX = "\\{(\\d)\\}";
 	
-	
 	//默认的短信有效时间单位（SECONDS、MINUTES、HOURS）
 	private final static TimeUnit DEFAULT_SMS_TIMEUNIT = TimeUnit.SECONDS;
 	
 	//緩存对象
-	private static Cache<String , String> cache ;
+	private Cache<String , String> cache ;
+	
+	//默认的同一手机号多次发送验证码冷却时间
+	private final static int DEFAULT_BLOCKTIME = 30;
+	
+	//緩存对象 记录每一个手机号最后发送验证码的时间
+	private Cache<String , String> lastTimeCache ;
 	
 	//实例化方法
-	public SmsNotifyManager(SMSProvider smsProvider,Producer captchaProducer,int time){
-		init(smsProvider,captchaProducer,time,-1);
-	}
-	//实例化方法
-	public SmsNotifyManager(SMSProvider smsProvider,Producer captchaProducer,int time,int maximumSize){
-		init(smsProvider,captchaProducer,time,maximumSize);
+	public SmsNotifyManager(SMSProvider smsProvider,Producer captchaProducer,int time,int blockTime,int maximumSize){
+		init(smsProvider,captchaProducer,time,blockTime,maximumSize);
 	}
 	
-	private void init(SMSProvider smsProvider,Producer captchaProducer,int time,int maximumSize){
+	private void init(SMSProvider smsProvider,Producer captchaProducer,int time,int blockTime,int maximumSize){
 		this.smsProvider=smsProvider;
 		this.captchaProducer=captchaProducer;
-		if(maximumSize < 0){
-			SmsNotifyManager.cache= CacheBuilder
-			          .newBuilder()
-			          .expireAfterWrite(time, DEFAULT_SMS_TIMEUNIT)
-			          .build();
-		}else{
-			SmsNotifyManager.cache= CacheBuilder
-			          .newBuilder()
-			          .maximumSize(maximumSize)
-			          .expireAfterWrite(time, DEFAULT_SMS_TIMEUNIT).softValues()
-			          .build();
+		if(maximumSize <= 0){
+			maximumSize = -1;
 		}
+		if(blockTime < 0){
+			blockTime = DEFAULT_BLOCKTIME;
+		}
+		lastTimeCache = createCache(blockTime,maximumSize);
+		cache = createCache(time,maximumSize);
+	}
+	
+	private Cache<String , String> createCache(int time,int maximumSize){
+		if(maximumSize < 0){
+			return CacheBuilder
+			        .newBuilder()
+			        .expireAfterWrite(time, DEFAULT_SMS_TIMEUNIT).softValues()
+			        .build();
+		}else{
+			return CacheBuilder
+			        .newBuilder()
+			        .maximumSize(maximumSize)
+			        .expireAfterWrite(time, DEFAULT_SMS_TIMEUNIT).softValues()
+			        .build();
+		}
+		
 	}
 	/**
 	 * 获取用户信息
 	 * @return
+	 * @throws SmsNotifyException 
 	 */
 	public UserInfo getUserInfo(){
 		return smsProvider.getUserInfo();
@@ -78,18 +95,37 @@ public class SmsNotifyManager {
 	 * @param captcha  随机生成的短信验证码
 	 * @return String  执行结果   ok：发送成功 ；其他：发送失败原因
 	 */
-	public String SendMessage(String mobile,String content,String captcha) {
+	public String sendMessage(String mobile,String content,String captcha){
 		
-		try {
+		if(checkBlock(mobile)){
 			String result=smsProvider.sendMessage(mobile, content);
 			if(result.equals("ok")){
 				cache.put(mobile, captcha);
+				lastTimeCache.put(mobile, captcha);
+				return result;
+			}else{
+				throw new SmsNotifyException(result);
 			}
-			return result;
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+		}else
+			throw new LimitSendCaptchaException("同一手机号连续发送短信频率过快，请稍后重试！");
+	}
+	
+	private String send(String mobile,String content,String captcha){
+		
+		if(StringUtils.isNotBlank(content) && content.equals("error")){
+			throw new IllegalTemplateContentException("非法的短信模板和替换内容");
+		}else if(checkBlock(mobile)){
+			String result=smsProvider.sendMessage(mobile, content);
+			if(result.equals("ok")){
+				cache.put(mobile, captcha);
+				lastTimeCache.put(mobile, captcha);
+				return result;
+			}else{
+				throw new SmsNotifyException(result);
+			}
+		}else{
+			throw new LimitSendCaptchaException("同一手机号连续发送短信频率过快，请稍后重试！");
 		}
-		return "异常错误！";
 	}
 	
 	/**
@@ -100,23 +136,9 @@ public class SmsNotifyManager {
 	 * @param captcha 随机生成的验证码
 	 * @return String 执行结果   ok：发送成功 ；其他：发送失败原因
 	 */
-	public String SendTemplateMessage(String mobile, String company,String captcha) {
-//		String captcha=getCaptcha();
-		try {
+	public String sendTemplateMessage(String mobile, String company,String captcha){
 			String content=fillStringByArgs(DEFAULT_SMS_TEMPLATE,DEFAULT_SMS_REGEX,company,captcha);
-			if(StringUtils.isNotBlank(content) && content.equals("error")){
-				return "非法的短信模板和替换内容";
-			}else{
-				String result=smsProvider.sendMessage(mobile, content);
-				if(result.equals("ok")){
-					cache.put(mobile, captcha);
-				}
-				return result;
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		return "异常错误！";
+			return send(mobile,content,captcha);
 	}
 	
 	/**
@@ -128,24 +150,10 @@ public class SmsNotifyManager {
 	 * @param args    短信模板中替换占位符的内容 （占位符和内容的顺序要保持一致）
 	 * @return  String  执行结果   ok：发送成功 ；其他：发送失败原因
 	 */
-	public String SendTemplateMessage(String mobile,String template,String captcha,String regex,String... args) {
+	public String sendTemplateMessage(String mobile,String template,String captcha,String regex,String... args){
 		
-		try {
 			String content=fillStringByArgs(template,regex,args);
-			if(StringUtils.isNotBlank(content) && content.equals("error")){
-				return "非法的短信模板和替换内容";
-			}else{
-				String result=smsProvider.sendMessage(mobile, content);
-				System.out.println("===result===>"+result);
-				if(result.equals("ok")){
-					cache.put(mobile, captcha);
-				}
-				return result;
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		return "异常错误！";
+			return send(mobile,content,captcha);
 	}
 	
 	/**
@@ -157,23 +165,9 @@ public class SmsNotifyManager {
 	 * @param args    短信模板中替换占位符的内容 （占位符和内容的顺序要保持一致）
 	 * @return   String 执行结果   ok：发送成功 ；其他：发送失败的原因   
 	 */
-	public String SendTemplateMessage(String mobile, String template,String captcha,Pattern pattern,String... args) {
-		
-		try {
+	public String sendTemplateMessage(String mobile, String template,String captcha,Pattern pattern,String... args){
 			String content=fillStringByArgs(template,pattern,args);
-			if(StringUtils.isNotBlank(content) && content.equals("error")){
-				return "非法的短信模板和替换内容";
-			}else{
-				String result=smsProvider.sendMessage(mobile, content);
-				if(result.equals("ok")){
-					cache.put(mobile, captcha);
-				}
-				return result;
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		return "异常错误！";
+			return send(mobile,content,captcha);
 	}
 	/**
 	 * 发送自定义模板验证码短信  
@@ -184,23 +178,10 @@ public class SmsNotifyManager {
 	 * @param args    短信模板中替换占位符的内容 （占位符和内容的顺序要保持一致）
 	 * @return  String 执行结果   ok：发送成功 ；其他：发送失败原因  
 	 */
-	public String SendTemplateMessage(String mobile, String template,String captcha,Matcher m,String... args) {
+	public String sendTemplateMessage(String mobile, String template,String captcha,Matcher m,String... args){
 		
-		try {
-			String content=fillStringByArgs(template,m,args);
-			if(StringUtils.isNotBlank(content) && content.equals("error")){
-				return "非法的短信模板和替换内容";
-			}else{
-				String result=smsProvider.sendMessage(mobile, content);
-				if(result.equals("ok")){
-					cache.put(mobile, captcha);
-				}
-				return result;
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		return "异常错误！";
+		String content=fillStringByArgs(template,m,args);
+		return send(mobile,content,captcha);
 	}
 	
 	/**
@@ -280,27 +261,48 @@ public class SmsNotifyManager {
 	 * @return 1.验证成功 2.验证码输入错误 3.验证码已失效 4.异常操作
 	 */
 	public String isMatcher(String smobile,String captcha){
-		
 		try {
-			String result=cache.get(smobile, new Callable<String>() {
+			String result = cache.get(smobile, new Callable<String>() {
 				@Override
 				public String call() throws Exception {
-					return "验证码已失效！";
+					return "Captcha failed";
 				}
 			});
-			if(StringUtils.isNotEmpty(result) && result.equals("验证码已失效！")){
-				return "3";
-			}
-			if(captcha.equals(result)){
-				cache.invalidate(smobile);
-				return "1";
-			}else{
-				return "2";
+			if(StringUtils.isNotEmpty(result)){
+				if(result.equals("Captcha failed"))
+					return "3";
+				else if(captcha.equals(result)){
+					cache.invalidate(smobile);
+					return "1";
+				}else{
+					return "2";
+				}
 			}
 		} catch (ExecutionException e) {
-			log.error(e.getMessage(), e);
+			log.error(e.getMessage(),e);
 		}
 		return "4";
+	}
+	/**
+	 * 判断当前手机号是否处于冷却状态（限制同一个手机号连续发送短信的频率）
+	 * @param smobile
+	 * @return
+	 */
+	private boolean checkBlock(String smobile){
+		try {
+			String result = lastTimeCache.get(smobile, new Callable<String>() {
+				@Override
+				public String call() throws Exception {
+					return "Expired";
+				}
+			});
+			if(StringUtils.isNotBlank(result) && result.equals("Expired")){
+				return true;
+			}
+		} catch (ExecutionException e) {
+			log.error(e.getMessage(),e);
+		}
+		return false;
 	}
 	
 }

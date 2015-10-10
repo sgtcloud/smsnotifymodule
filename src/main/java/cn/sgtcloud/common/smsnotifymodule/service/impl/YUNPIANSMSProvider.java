@@ -21,6 +21,7 @@ import org.apache.http.util.EntityUtils;
 
 import cn.sgtcloud.common.smsnotifymodule.service.SMSProvider;
 import cn.sgtcloud.common.smsnotifymodule.service.UserInfo;
+import cn.sgtcloud.common.smsnotifymodule.service.exception.SmsNotifyException;
 /**
  * 云片网短信服务供应商
  * @author peisy
@@ -47,9 +48,10 @@ public class YUNPIANSMSProvider implements SMSProvider{
      * 取账户信息
      *
      * @return json格式字符串
+	 * @throws SmsNotifyException 
      * @throws java.io.IOException
      */
-	public UserInfo getUserInfo() {
+	public UserInfo getUserInfo(){
         Map<String, String> params = new HashMap<String, String>();
         params.put("apikey", apiKey);
         String result=post(URI_GET_USER_INFO, params);
@@ -63,8 +65,8 @@ public class YUNPIANSMSProvider implements SMSProvider{
         		info.setIp_whitelist(userjsonObject.getString("ip_whitelist").split(","));
         	}
         	return info;
-        }
-        return null;
+        }else
+        	throw new SmsNotifyException();
     }
 
     /**
@@ -74,6 +76,7 @@ public class YUNPIANSMSProvider implements SMSProvider{
      * @param text   　短信内容
      * @param mobile 　接受的手机号
      * @return json格式字符串
+     * @throws SmsNotifyException 
      * @throws IOException
      */
 	public String sendMessage(String mobile,String text){
@@ -85,8 +88,8 @@ public class YUNPIANSMSProvider implements SMSProvider{
         if(StringUtils.isNotEmpty(result)){
         	JSONObject jsonObject = JSONObject.fromObject(result);
         	return jsonObject.optString("msg").toLowerCase();
-        }
-        return "ok";
+        }else
+        	throw new SmsNotifyException();
     }
     /**
      * 基于HttpClient 4.3的通用POST方法
